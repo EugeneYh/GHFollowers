@@ -17,9 +17,9 @@ class FollowerListViewController: UIViewController {
         view.backgroundColor = .systemBackground
         navigationController?.isNavigationBarHidden = false
         
-        NetworkManager.shared.getFollowers(for: username, page: 1) { (followers, error) in
+        NetworkManager.shared.getFollowers(for: username, page: 1) { (followers, errorMessage) in
             guard let followers = followers else {
-                self.presentAlertVCInMainThread(title: "Bad stuff happened", message: error!, buttonTitle: "Ok")
+                self.presentAlertVCInMainThread(title: "Bad stuff happened", message: errorMessage!.rawValue, buttonTitle: "Ok")
                 return
             }
             
