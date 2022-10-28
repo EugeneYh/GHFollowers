@@ -52,6 +52,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             createFavoritesNavigationViewController()
         ]
         
+        if #available(iOS 15.0, *) {
+            let tabBarAppearance = UITabBarAppearance()
+            tabBarAppearance.configureWithOpaqueBackground()
+            UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+        }
+        
         return mainTabBarController
     }
     

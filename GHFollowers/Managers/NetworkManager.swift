@@ -5,18 +5,18 @@
 //  Created by Eugene Yehanovskiy on 07.10.2022.
 //
 
-import Foundation
+import UIKit
 
 class NetworkManager {
     static let shared = NetworkManager()
     
+    let cache = NSCache<NSString, UIImage>()
     let baseURL = "https://api.github.com/users/"
     
     private init() {}
     
     func getFollowers(for username: String, page: Int, completion: @escaping (Result<[Follower], GFError>) -> Void) {
-        let endpoint = baseURL + "\(username)/followers?per_page=100"
-        print(endpoint)
+        let endpoint = baseURL + "\(username)/followers?per_page=100&page=\(page)"
         
         guard let url = URL(string: endpoint) else {
             completion(.failure(.invalidUsername))
@@ -47,8 +47,6 @@ class NetworkManager {
                 completion(.failure(.invalidData))
             }
         }
-        
         task.resume()
-        
     }
 }

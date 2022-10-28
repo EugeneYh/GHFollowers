@@ -18,7 +18,6 @@ class SearchViewController: UIViewController {
         } else {
             return false
         }
-        
     }
 
     override func viewDidLoad() {
@@ -99,7 +98,6 @@ class SearchViewController: UIViewController {
 extension SearchViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         pushFollowersListVC()
-        print("Opa")
         return true
     }
 }
