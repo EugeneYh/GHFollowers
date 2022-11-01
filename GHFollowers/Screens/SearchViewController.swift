@@ -36,7 +36,7 @@ class SearchViewController: UIViewController {
         
         navigationController?.setNavigationBarHidden(true, animated: true)
 
-        usernameTextField.text = ""
+        //usernameTextField.text = ""
     }
     
     @objc private func pushFollowersListVC() {

@@ -15,8 +15,10 @@ class FollowerListViewController: UIViewController {
     
     var username: String!
     var followers: [Follower] = []
+    var filteredFollowers: [Follower] = []
     var page = 1
     var hasMoreFollowers = true
+    var isSearched = false
     
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<Section, Follower>!
@@ -24,16 +26,18 @@ class FollowerListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureVC()
-        getFollowers(username: username, page: page)
+        configureSearchController()
         configureCollectionView()
+        getFollowers(username: username, page: page)
         setupDataSource()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+                        
         navigationController?.setNavigationBarHidden(false, animated: true)
         navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.hidesSearchBarWhenScrolling = false
     }
     
     private func configureVC() {
@@ -49,10 +53,19 @@ class FollowerListViewController: UIViewController {
         collectionView.register(FollowerCell.self, forCellWithReuseIdentifier: FollowerCell.reuseID)
     }
     
+    private func configureSearchController() {
+        let searchController = UISearchController()
+        searchController.searchResultsUpdater = self
+        searchController.searchBar.delegate = self
+        searchController.searchBar.placeholder = "Find a user"
+        self.navigationItem.searchController = searchController
+    }
+    
     private func getFollowers(username: String, page: Int) {
         showActivityIndicator()
         NetworkManager.shared.getFollowers(for: username, page: page) { [weak self] result in
             guard let self = self else { return }
+            self.isSearched = false
             
             self.hideActivityIndicator()
 
@@ -72,7 +85,7 @@ class FollowerListViewController: UIViewController {
                         return
                     }
                 
-                    self.updateData()
+                    self.updateData(for: self.followers)
                 case .failure(let error):
                     self.presentAlertVCInMainThread(title: "Bad stuff happened", message: error.rawValue, buttonTitle: "Ok")
             }
@@ -87,10 +100,10 @@ class FollowerListViewController: UIViewController {
         })
     }
     
-    private func updateData() {
+    private func updateData(for data: [Follower]) {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Follower>()
         snapshot.appendSections([.main])
-        snapshot.appendItems(followers)
+        snapshot.appendItems(data)
         DispatchQueue.main.async {
             self.dataSource.apply(snapshot, animatingDifferences: true)
         }
@@ -110,5 +123,28 @@ extension FollowerListViewController: UICollectionViewDelegate {
             page += 1
             getFollowers(username: username, page: page)
         }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let activeArray = isSearched ? filteredFollowers : followers
+        let user = activeArray[indexPath.row]
+        let destVC = UserInfoViewController()
+        destVC.username = user.login
+        let userInfoNavVC = UINavigationController(rootViewController: destVC)
+        present(userInfoNavVC, animated: true)
+    }
+}
+
+extension FollowerListViewController: UISearchResultsUpdating, UISearchBarDelegate {
+    func updateSearchResults(for searchController: UISearchController) {
+        guard let input = searchController.searchBar.text, !input.isEmpty else { return }
+        isSearched = true
+        filteredFollowers = followers.filter { $0.login.lowercased().contains(input.lowercased()) }
+        updateData(for: filteredFollowers)
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        isSearched = false
+        updateData(for: followers)
     }
 }

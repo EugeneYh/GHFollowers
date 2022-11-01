@@ -45,6 +45,7 @@ extension UIViewController {
     
     func hideActivityIndicator() {
         DispatchQueue.main.async {
+            #warning("Handle the network reachability") 
             containerView.removeFromSuperview()
             containerView = nil
         }
