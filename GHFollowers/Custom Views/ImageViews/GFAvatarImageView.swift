@@ -31,7 +31,9 @@ class GFAvatarImageView: UIImageView {
     func downloadAvatarImage(from urlString: String) {
         let cacheKey = NSString(string: urlString)
         if let image = cache.object(forKey: cacheKey) {
-            self.image = image
+            DispatchQueue.main.async {
+                self.image = image
+            }
             return
         }
         
