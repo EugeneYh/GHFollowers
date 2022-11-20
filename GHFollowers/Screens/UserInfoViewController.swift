@@ -12,8 +12,9 @@ class UserInfoViewController: UIViewController {
     var username: String?
     private let headerVC = GFUserInfoHeaderViewController()
     private let headerView  = UIView()
-    private let firstView = UIView()
-    private let secondView = UIView()
+    private let firstView = GFItemInfoView()
+    private let secondView = GFItemInfoView()
+    private let dateLabel = GFBodyLabel(textAlignment: .center)
     
     //MARK: - Layout paddings/sizes
     private let itemHeight: CGFloat = 140
@@ -40,6 +41,9 @@ class UserInfoViewController: UIViewController {
                     self.headerVC.user = user
                     DispatchQueue.main.async {
                         self.add(childVC: self.headerVC, to: self.headerView)
+                        self.add(childVC: GFRepoItemViewController(user: user), to: self.firstView)
+                        self.add(childVC: GFFollowersItemViewController(user: user), to: self.secondView)
+                        self.dateLabel.text = "Github since \(user.createdAt.convertToDisplayFormat())"
                     }
                 case .failure(let error):
                     self.presentAlertVCInMainThread(title: "Someting went wrong", message: error.rawValue, buttonTitle: "Ok")
@@ -49,7 +53,7 @@ class UserInfoViewController: UIViewController {
     
     private func setupUI() {
 
-        views = [headerView, firstView, secondView]
+        views = [headerView, firstView, secondView, dateLabel]
         views.forEach { itemView in
             self.view.addSubview(itemView)
             itemView.translatesAutoresizingMaskIntoConstraints = false
@@ -59,9 +63,7 @@ class UserInfoViewController: UIViewController {
             ])
         }
         
-        firstView.backgroundColor = .systemPink
-        secondView.backgroundColor = .blue
-                
+
         NSLayoutConstraint.activate([
             headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             headerView.heightAnchor.constraint(equalToConstant: 180),
@@ -72,6 +74,8 @@ class UserInfoViewController: UIViewController {
             secondView.topAnchor.constraint(equalTo: firstView.bottomAnchor, constant: viewPadding),
             secondView.heightAnchor.constraint(equalToConstant: itemHeight),
             
+            dateLabel.topAnchor.constraint(equalTo: secondView.bottomAnchor, constant: viewPadding),
+            dateLabel.heightAnchor.constraint(equalToConstant: 18)
         ])
     }
     
