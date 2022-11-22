@@ -8,17 +8,30 @@
 import UIKit
 
 class GFRepoItemViewController: GFItemInfoViewController {
+    
+    override var user: User? {
+        didSet {
+            if let user = user {
+                itemView1.setupItemView(for: .repo, with: user.publicRepos)
+                itemView2.setupItemView(for: .gists, with: user.publicGists)
+            } else {
+                return
+            }
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
         configureItems()
     }
+    
+    override func actionButtonTapped() {
+        guard let user = user else { return }
+        delegate?.didTapGithubProfile(for: user)
+    }
 
     private func configureItems() {
-        guard let user = self.user else { return }
-        itemView1.setupItemView(for: .repo, with: user.publicRepos)
-        itemView2.setupItemView(for: .gists, with: user.publicGists)
         actionButton.set(backgroundColor: .systemPurple, title: "Github  Profile")
     }
 }

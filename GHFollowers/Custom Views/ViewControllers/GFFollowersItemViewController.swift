@@ -9,6 +9,17 @@ import UIKit
 
 class GFFollowersItemViewController: GFItemInfoViewController {
 
+    override var user: User? {
+        didSet {
+            if let user = user {
+                itemView1.setupItemView(for: .following, with: user.following ?? 0)
+                itemView2.setupItemView(for: .followers, with: user.followers ?? 0)
+            } else {
+                return
+            }
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -16,9 +27,6 @@ class GFFollowersItemViewController: GFItemInfoViewController {
     }
 
     private func configureItems() {
-        guard let user = self.user else { return }
-        itemView1.setupItemView(for: .following, with: user.following ?? 0)
-        itemView2.setupItemView(for: .followers, with: user.followers ?? 0)
         actionButton.set(backgroundColor: .systemGreen, title: "Get Followers")
     }
 }

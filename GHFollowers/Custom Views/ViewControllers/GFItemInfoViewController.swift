@@ -18,14 +18,17 @@ class GFItemInfoViewController: UIViewController {
     
     private   let padding: CGFloat = 20
     
-    init(user: User) {
-        super.init(nibName: nil, bundle: nil)
-        self.user = user
-    }
+    weak var delegate: UserInfoViewControllerDelegate?
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    //MARK: - Alternative method of initialising the user property
+//    init(user: User) {
+//        super.init(nibName: nil, bundle: nil)
+//        self.user = user
+//    }
+//    
+//    required init?(coder: NSCoder) {
+//        fatalError("init(coder:) has not been implemented")
+//    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,8 +37,14 @@ class GFItemInfoViewController: UIViewController {
         view.layer.cornerRadius = 20
 
         setupUI()
-        setupStackView()
+        setupActionButton()
     }
+    
+    private func setupActionButton() {
+        actionButton.addTarget(self, action: #selector(actionButtonTapped), for: .touchUpInside)
+    }
+    
+    @objc func actionButtonTapped() {}
     
     private func setupStackView() {
         stackView.addArrangedSubview(itemView1)
@@ -47,6 +56,8 @@ class GFItemInfoViewController: UIViewController {
     }
     
     private func setupUI() {
+        setupStackView()
+        
         view.addSubview(stackView)
         view.addSubview(actionButton)
         

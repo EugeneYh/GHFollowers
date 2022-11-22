@@ -7,13 +7,21 @@
 
 import UIKit
 
+protocol UserInfoViewControllerDelegate: AnyObject {
+    func didTapGithubProfile(for user: User)
+    func didTapGithubFollowers(for user: User)
+}
+
 class UserInfoViewController: UIViewController {
     
-    var username: String?
     private let headerVC = GFUserInfoHeaderViewController()
+    private let repoItemVC = GFRepoItemViewController()
+    private let followersVC = GFFollowersItemViewController()
+    
     private let headerView  = UIView()
     private let firstView = GFItemInfoView()
     private let secondView = GFItemInfoView()
+    
     private let dateLabel = GFBodyLabel(textAlignment: .center)
     
     //MARK: - Layout paddings/sizes
@@ -21,6 +29,10 @@ class UserInfoViewController: UIViewController {
     private let viewPadding: CGFloat = 20
     
     private var views: [UIView] = []
+    private var user: User?
+    
+    var username: String?
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,14 +53,24 @@ class UserInfoViewController: UIViewController {
                     self.headerVC.user = user
                     DispatchQueue.main.async {
                         self.add(childVC: self.headerVC, to: self.headerView)
-                        self.add(childVC: GFRepoItemViewController(user: user), to: self.firstView)
-                        self.add(childVC: GFFollowersItemViewController(user: user), to: self.secondView)
+                        self.configureVCs(with: user)
                         self.dateLabel.text = "Github since \(user.createdAt.convertToDisplayFormat())"
                     }
                 case .failure(let error):
                     self.presentAlertVCInMainThread(title: "Someting went wrong", message: error.rawValue, buttonTitle: "Ok")
             }
         }
+    }
+    
+    private func configureVCs(with user: User) {
+        repoItemVC.user = user
+        repoItemVC.delegate = self
+        
+        followersVC.user = user
+        followersVC.delegate = self
+        
+        add(childVC: repoItemVC, to: firstView)
+        add(childVC: followersVC, to: secondView)
     }
     
     private func setupUI() {
@@ -96,4 +118,22 @@ class UserInfoViewController: UIViewController {
     @objc private func closeVC() {
         self.dismiss(animated: true)
     }
+}
+
+extension UserInfoViewController: UserInfoViewControllerDelegate {
+    
+    func didTapGithubProfile(for user: User) {
+        guard let url = URL(string: user.htmlUrl) else {
+            presentAlertVCInMainThread(title: "Page not found", message: "The user's page was not found due to unexpected error.", buttonTitle: "Got it")
+            return
+        }
+        presentSafariVC(with: url)
+    }
+    
+    func didTapGithubFollowers(for user: User) {
+        // open followerrs list vc with the related followers
+        print("show followers")
+    }
+    
+    
 }
