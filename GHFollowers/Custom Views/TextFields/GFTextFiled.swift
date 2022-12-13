@@ -19,12 +19,6 @@ class GFTextFiled: UITextField {
         fatalError("init(coder:) has not been implemented")
     }
     
-    init() {
-        super.init(frame: .zero)
-        
-        configure()
-    }
-    
     private func configure() {
         translatesAutoresizingMaskIntoConstraints = false
         
@@ -40,9 +34,8 @@ class GFTextFiled: UITextField {
         minimumFontSize = 12
         backgroundColor = .tertiarySystemBackground
         autocorrectionType = .no
+        clearButtonMode = .whileEditing
         returnKeyType = .go
-        
         placeholder = "Enter a username "
     }
-
 }

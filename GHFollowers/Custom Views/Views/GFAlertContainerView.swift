@@ -1,17 +1,13 @@
 //
-//  GFAvatarImageView.swift
+//  GFAlertContainerView.swift
 //  GHFollowers
 //
-//  Created by Eugene Yehanovskiy on 09.10.2022.
+//  Created by Eugene Yehanovskiy on 30.11.2022.
 //
 
 import UIKit
 
-class GFAvatarImageView: UIImageView {
-    
-    private let placeholderImage = Images.avatar
-    private let cache = NetworkManager.shared.cache
-    
+class GFAlertContainerView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         configure()
@@ -22,9 +18,10 @@ class GFAvatarImageView: UIImageView {
     }
     
     private func configure() {
-        layer.cornerRadius = 10
-        clipsToBounds = true
-        image = placeholderImage
         translatesAutoresizingMaskIntoConstraints = false
-    } 
+        backgroundColor = .systemBackground
+        layer.cornerRadius = 16
+        layer.borderWidth = 2
+        layer.borderColor = UIColor.white.cgColor
+    }
 }

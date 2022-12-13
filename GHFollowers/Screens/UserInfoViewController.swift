@@ -8,11 +8,15 @@
 import UIKit
 
 protocol UserInfoViewControllerDelegate: AnyObject {
-    func didTapGithubProfile(for user: User)
-    func didTapGithubFollowers(for user: User)
+    func didUpdateFollowersList(for username: String  )
 }
 
-class UserInfoViewController: UIViewController {
+class UserInfoViewController: GFDataLoadingViewController {
+    
+    weak var delegate: UserInfoViewControllerDelegate?
+    
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
     
     private let headerVC = GFUserInfoHeaderViewController()
     private let repoItemVC = GFRepoItemViewController()
@@ -42,6 +46,18 @@ class UserInfoViewController: UIViewController {
         getUserInfo()
     }
     
+    private func configureScrollView() {
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        scrollView.pinToEdges(of: view)
+        contentView.pinToEdges(of: scrollView)
+        
+        NSLayoutConstraint.activate([
+            contentView.widthAnchor.constraint(equalTo: view.widthAnchor),
+            contentView.heightAnchor.constraint(equalToConstant: 600)
+        ])
+    }
+    
     private func getUserInfo() {
         guard let username = username else { return }
         
@@ -54,7 +70,7 @@ class UserInfoViewController: UIViewController {
                     DispatchQueue.main.async {
                         self.add(childVC: self.headerVC, to: self.headerView)
                         self.configureVCs(with: user)
-                        self.dateLabel.text = "Github since \(user.createdAt.convertToDisplayFormat())"
+                        self.dateLabel.text = "Github since \(user.createdAt.convertToMonthYearFormat())"
                     }
                 case .failure(let error):
                     self.presentAlertVCInMainThread(title: "Someting went wrong", message: error.rawValue, buttonTitle: "Ok")
@@ -74,10 +90,11 @@ class UserInfoViewController: UIViewController {
     }
     
     private func setupUI() {
+        configureScrollView()
 
         views = [headerView, firstView, secondView, dateLabel]
         views.forEach { itemView in
-            self.view.addSubview(itemView)
+            self.contentView.addSubview(itemView)
             itemView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 itemView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: viewPadding),
@@ -85,9 +102,8 @@ class UserInfoViewController: UIViewController {
             ])
         }
         
-
         NSLayoutConstraint.activate([
-            headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            headerView.topAnchor.constraint(equalTo: contentView.topAnchor),
             headerView.heightAnchor.constraint(equalToConstant: 180),
             
             firstView.topAnchor.constraint(equalTo: headerView.bottomAnchor, constant: viewPadding),
@@ -120,7 +136,7 @@ class UserInfoViewController: UIViewController {
     }
 }
 
-extension UserInfoViewController: UserInfoViewControllerDelegate {
+extension UserInfoViewController: GFRepoItemViewControllerDelegate {
     
     func didTapGithubProfile(for user: User) {
         guard let url = URL(string: user.htmlUrl) else {
@@ -129,11 +145,16 @@ extension UserInfoViewController: UserInfoViewControllerDelegate {
         }
         presentSafariVC(with: url)
     }
+}
+
+extension UserInfoViewController: GFFollowersItemViewControllerDelegate {
     
     func didTapGithubFollowers(for user: User) {
-        // open followerrs list vc with the related followers
-        print("show followers")
+        guard user.followers != 0 else {
+            presentAlertVCInMainThread(title: "No Followers", message: "This user has't followers yet. You can be the first!", buttonTitle: "Ok")
+            return
+        }
+        delegate?.didUpdateFollowersList(for: user.login)
+        self.dismiss(animated: true)
     }
-    
-    
 }

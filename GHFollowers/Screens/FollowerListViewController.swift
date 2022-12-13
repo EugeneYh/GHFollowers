@@ -7,11 +7,7 @@
 
 import UIKit
 
-protocol FollowerListViewControllerDelegate {
-    func didUpdateFollowersList(for username: String  )
-}
-
-class FollowerListViewController: UIViewController {
+class FollowerListViewController: GFDataLoadingViewController {
     
     enum Section {
         case main
@@ -26,6 +22,16 @@ class FollowerListViewController: UIViewController {
     
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<Section, Follower>!
+    
+    init(username: String) {
+        super.init(nibName: nil, bundle: nil)
+        self.username = username
+        title = username
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,11 +48,39 @@ class FollowerListViewController: UIViewController {
         navigationController?.setNavigationBarHidden(false, animated: true)
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.hidesSearchBarWhenScrolling = false
+        
+    }
+    
+    @objc func addToFavorites() {
+        showActivityIndicator()
+        
+        NetworkManager.shared.getUserInfo(for: username) { [weak self] result in
+            guard let self = self else { return }
+            self.hideActivityIndicator()
+            
+            switch result {
+            case .success(let user):
+                let favorite = Follower(login: user.login, avatarUrl: user.avatarUrl)
+                
+                PersistanceManager.updateWith(favorite: favorite, actionType: .save) { [weak self] error in
+                    guard let self = self else { return }
+                    guard let error = error else {
+                        self.presentAlertVCInMainThread(title: "Success", message: "User was successfully added", buttonTitle: "Cool")
+                        return
+                    }
+                    self.presentAlertVCInMainThread(title: "Something went wrong", message: error.rawValue, buttonTitle: "Ok")
+                }
+            case .failure(let error):
+                self.presentAlertVCInMainThread(title: "Something went wrong", message: error.rawValue, buttonTitle: "Ok")
+            }
+        }
     }
     
     private func configureVC() {
         view.backgroundColor = .systemBackground
         navigationController?.isNavigationBarHidden = false
+        let addNavButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addToFavorites))
+        navigationItem.rightBarButtonItem = addNavButton
     }
     
     private func configureCollectionView() {
@@ -133,6 +167,7 @@ extension FollowerListViewController: UICollectionViewDelegate {
         let activeArray = isSearched ? filteredFollowers : followers
         let user = activeArray[indexPath.row]
         let destVC = UserInfoViewController()
+        destVC.delegate = self
         destVC.username = user.login
         let userInfoNavVC = UINavigationController(rootViewController: destVC)
         present(userInfoNavVC, animated: true)
@@ -141,7 +176,12 @@ extension FollowerListViewController: UICollectionViewDelegate {
 
 extension FollowerListViewController: UISearchResultsUpdating, UISearchBarDelegate {
     func updateSearchResults(for searchController: UISearchController) {
-        guard let input = searchController.searchBar.text, !input.isEmpty else { return }
+        guard let input = searchController.searchBar.text, !input.isEmpty else {
+            filteredFollowers.removeAll()
+            updateData(for: followers)
+            isSearched = false
+            return
+        }
         isSearched = true
         filteredFollowers = followers.filter { $0.login.lowercased().contains(input.lowercased()) }
         updateData(for: filteredFollowers)
@@ -153,10 +193,14 @@ extension FollowerListViewController: UISearchResultsUpdating, UISearchBarDelega
     }
 }
 
-extension FollowerListViewController: FollowerListViewControllerDelegate {
-    func didUpdateFollowersList() {
-        print("update list")
+extension FollowerListViewController: UserInfoViewControllerDelegate {
+    func didUpdateFollowersList(for username: String) {
+        self.username = username
+        title = username
+        page = 1
+        followers.removeAll()
+        filteredFollowers.removeAll()
+        collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
+        getFollowers(username: username, page: page)
     }
-    
-    
 }

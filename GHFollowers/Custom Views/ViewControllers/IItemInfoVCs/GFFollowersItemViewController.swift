@@ -7,7 +7,14 @@
 
 import UIKit
 
+protocol GFFollowersItemViewControllerDelegate: AnyObject {
+    
+    func didTapGithubFollowers(for user: User)
+}
+
 class GFFollowersItemViewController: GFItemInfoViewController {
+    
+    weak var delegate: GFFollowersItemViewControllerDelegate? 
 
     override var user: User? {
         didSet {
@@ -28,5 +35,10 @@ class GFFollowersItemViewController: GFItemInfoViewController {
 
     private func configureItems() {
         actionButton.set(backgroundColor: .systemGreen, title: "Get Followers")
+    }
+    
+    override func actionButtonTapped() {
+        guard let user = user else { return }
+        delegate?.didTapGithubFollowers(for: user)
     }
 }

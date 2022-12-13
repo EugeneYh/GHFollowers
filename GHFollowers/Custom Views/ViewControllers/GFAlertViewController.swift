@@ -9,7 +9,7 @@ import UIKit
 
 class GFAlertViewController: UIViewController {
     
-    let containerView = UIView()
+    let containerView = GFAlertContainerView()
     let titleLabel = GFTitleLabel(textAlignment: .center, fontSize: 20)
     let messageLabel = GFBodyLabel(textAlignment: .center)
     let actionButton = GFButton(backgroundColor: .systemPink, title: "Ok")
@@ -34,7 +34,8 @@ class GFAlertViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.75)
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.75)
+        view.addSubviews(containerView, titleLabel, messageLabel, actionButton)
         configureView()
         configureTitleLabel()
         configureMessageLabel()
@@ -42,12 +43,6 @@ class GFAlertViewController: UIViewController {
     }
     
     private func configureView() {
-        view.addSubview(containerView)
-        containerView.translatesAutoresizingMaskIntoConstraints = false
-        containerView.backgroundColor = .systemBackground
-        containerView.layer.cornerRadius = 16
-        containerView.layer.borderWidth = 2
-        containerView.layer.borderColor = UIColor.white.cgColor
         
         NSLayoutConstraint.activate([
             containerView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -58,7 +53,6 @@ class GFAlertViewController: UIViewController {
     }
     
     private func configureTitleLabel() {
-        containerView.addSubview(titleLabel)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
         titleLabel.text = alertTitle ?? "Error message"
@@ -72,7 +66,6 @@ class GFAlertViewController: UIViewController {
     }
     
     private func configureActionButton() {
-        containerView.addSubview(actionButton)
         actionButton.addTarget(self, action: #selector(dismissAlertVC), for: .touchUpInside)
         actionButton.translatesAutoresizingMaskIntoConstraints = false
         
@@ -85,14 +78,12 @@ class GFAlertViewController: UIViewController {
     }
     
     private func configureMessageLabel() {
-        containerView.addSubview(messageLabel)
         messageLabel.numberOfLines = 4
         messageLabel.text = message ?? "Error text message"
         
         NSLayoutConstraint.activate([
             messageLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
             messageLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: padding),
-            //messageLabel.bottomAnchor.constraint(equalTo: actionButton.topAnchor, constant: -12),
             messageLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -padding)
         ])
     }
@@ -100,5 +91,4 @@ class GFAlertViewController: UIViewController {
     @objc private func dismissAlertVC() {
         dismiss(animated: true)
     }
-
 }

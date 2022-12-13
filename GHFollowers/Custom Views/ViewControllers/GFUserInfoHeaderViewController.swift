@@ -19,12 +19,15 @@ class GFUserInfoHeaderViewController: UIViewController {
     var user: User? {
         didSet{
             if let user = user {
-                self.userAvatarImageView.downloadAvatarImage(from: user.avatarUrl)
-                DispatchQueue.main.async {
-                    self.usernameLabel.text = user.login
-                    self.fullNameLabel.text = user.name
-                    self.locationLabel.text = user.location ?? "No location"
-                    self.bioLabel.text = user.bio ?? "No bio"
+                NetworkManager.shared.downloadImage(from: user.avatarUrl) { [weak self] image in
+                    guard let self = self else { return }
+                    DispatchQueue.main.async {
+                        self.userAvatarImageView.image = image
+                        self.usernameLabel.text = user.login
+                        self.fullNameLabel.text = user.name
+                        self.locationLabel.text = user.location ?? "No location"
+                        self.bioLabel.text = user.bio ?? "No bio"
+                    }
                 }
             }
         }
@@ -35,21 +38,15 @@ class GFUserInfoHeaderViewController: UIViewController {
         
         view.backgroundColor = .systemBackground
         setupUI()
-
     }
     
     private func addSubviews() {
-        view.addSubview(userAvatarImageView)
-        view.addSubview(usernameLabel)
-        view.addSubview(fullNameLabel)
-        view.addSubview(locationImageView)
-        view.addSubview(locationLabel)
-        view.addSubview(bioLabel)
+        view.addSubviews(userAvatarImageView, usernameLabel, fullNameLabel, locationImageView, locationLabel, bioLabel)
     }
     
     private func setupUI() {
         addSubviews()
-        locationImageView.image = UIImage(systemName: SFSymbols.location)
+        locationImageView.image = Images.location
         locationImageView.tintColor = .secondaryLabel
         locationImageView.translatesAutoresizingMaskIntoConstraints = false
         let padding: CGFloat = 18

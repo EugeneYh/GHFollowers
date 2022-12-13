@@ -8,11 +8,16 @@
 import Foundation
 
 extension Date {
+    
     func convertToMonthYearFormat() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM yyyy"
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        
-        return formatter.string(from: self)
+        return formatted(.dateTime.month().year())
     }
+    
+//    func convertToMonthYearFormat() -> String {
+//        let formatter = DateFormatter()
+//        formatter.dateFormat = "MMM yyyy"
+//        formatter.locale = Locale(identifier: "en_US_POSIX")
+//
+//        return formatter.string(from: self)
+//    }
 }

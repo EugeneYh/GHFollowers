@@ -33,9 +33,7 @@ class GFItemInfoView: UIView {
     }
     
     private func setupUI() {
-        addSubview(iconImageView)
-        addSubview(titleLabel)
-        addSubview(countLabel)
+        addSubviews(iconImageView, titleLabel, countLabel)
         
         NSLayoutConstraint.activate([
             iconImageView.topAnchor.constraint(equalTo: self.topAnchor),
@@ -58,21 +56,19 @@ class GFItemInfoView: UIView {
     func setupItemView(for itemType: ItemType, with count: Int) {
         switch itemType {
         case .repo:
-            iconImageView.image = UIImage(systemName: SFSymbols.repo)
+            iconImageView.image = Images.repo
             titleLabel.text = "Public Repos"
         case .gists:
-            iconImageView.image = UIImage(systemName: SFSymbols.gists)
+            iconImageView.image = Images.gists
             titleLabel.text = "Public Gists"
         case .followers:
-            iconImageView.image = UIImage(systemName: SFSymbols.followers)
+            iconImageView.image = Images.followers
             titleLabel.text = "Followers"
         case .following:
-            iconImageView.image = UIImage(systemName: SFSymbols.following)
+            iconImageView.image = Images.following
             titleLabel.text = "Following"
         }
         
         countLabel.text = String(count)
     }
-
-
 }

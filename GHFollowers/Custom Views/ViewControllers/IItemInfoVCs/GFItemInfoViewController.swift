@@ -18,17 +18,7 @@ class GFItemInfoViewController: UIViewController {
     
     private   let padding: CGFloat = 20
     
-    weak var delegate: UserInfoViewControllerDelegate?
-    
-    //MARK: - Alternative method of initialising the user property
-//    init(user: User) {
-//        super.init(nibName: nil, bundle: nil)
-//        self.user = user
-//    }
-//    
-//    required init?(coder: NSCoder) {
-//        fatalError("init(coder:) has not been implemented")
-//    }
+//    weak var delegate: ItemInfoViewControllerDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,8 +48,7 @@ class GFItemInfoViewController: UIViewController {
     private func setupUI() {
         setupStackView()
         
-        view.addSubview(stackView)
-        view.addSubview(actionButton)
+        view.addSubviews(stackView, actionButton)
         
         NSLayoutConstraint.activate([
             stackView.topAnchor.constraint(equalTo: view.topAnchor, constant: padding),
